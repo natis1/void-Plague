@@ -12,29 +12,42 @@ public class SIRThread extends Thread {
     protected Apfloat timerate;
     protected Apfloat infectionRate;
     protected Apfloat recoveryRate;
+    protected Apfloat maxInfected;
+    protected Apfloat maxInfectedTimestep;
+
+    public boolean didComplete = false;
+    public boolean removeMe = false;
 
 
 
-
-
-    protected Vector<Apfloat> SIRThread (Apfloat susceptible, Apfloat infected, Apfloat infectionRate, Apfloat recoveryRate, Apfloat timerate){
+    protected SIRThread (Apfloat susceptible, Apfloat infected, Apfloat infectionRate, Apfloat recoveryRate, Apfloat timerate){
         this.susceptible = susceptible;
         this.infected = infected;
-        this.infectionRate = infectionRate;
-        this.recoveryRate = recoveryRate;
+        this.infectionRate = infectionRate.multiply(timerate);
+        this.recoveryRate = recoveryRate.multiply(timerate);
         this.start();
+        try {
+            this.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            //This could never possibly happen
+            System.out.println("HELPPPPP");
+        }
 
+        didComplete = true;
+    }
 
-
+    public Vector<Apfloat> returnGeneratedValues() {
         Vector<Apfloat> values = new Vector<Apfloat>(5);
         values.add(this.susceptible);
         values.add(this.infected);
         values.add(this.recovered);
+        values.add(this.maxInfected);
+        values.add(this.maxInfectedTimestep);
+        return values;
     }
 
     private void advanceOneTimestep () {
-
-
 
 
 
@@ -50,10 +63,7 @@ public class SIRThread extends Thread {
     @Override
     public void run() {
 
-
-
-
-
+        advanceOneTimestep();
 
     }
 
