@@ -5,7 +5,7 @@ public class Main {
         int threadsToUse = 0;
 
         if (args.length > 0){
-            if (args[0] == "-t" || args[0] == "-T") {
+            if (args[0].contains("-t")|| args[0].contains("-t")) {
                 if (args.length > 1){
                     new DiseaseInputParser(Integer.parseInt(args[1]));
                 } else {

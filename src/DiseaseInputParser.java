@@ -12,6 +12,9 @@ import org.apfloat.Apfloat;
 public class DiseaseInputParser {
 
 
+    private final boolean IDE_MODE = false;
+
+
     int processorThreads;
     protected static int entropy = 128;
 
@@ -253,12 +256,8 @@ public class DiseaseInputParser {
         System.out.println("You can enter all these values automatically by running void-plague < input.txt");
 
 
-        if (false) {
 
-            for (int i = 0; i < 10; i++) {
-                allUserInputs.set(i, System.console().readLine());
-            }
-        } else {
+        if (IDE_MODE){
             allUserInputs.add("0");
             allUserInputs.add("0.1");
             allUserInputs.add("0");
@@ -269,7 +268,14 @@ public class DiseaseInputParser {
             allUserInputs.add("0.1");
             allUserInputs.add("7800000");
             allUserInputs.add("10");
+        } else {
+            for (int i = 0; i < 10; i++) {
+                allUserInputs.set(i, System.console().readLine());
+            }
         }
+
+
+
 
         return allUserInputs;
     }
