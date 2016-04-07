@@ -1,3 +1,4 @@
+import java.io.Console;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -269,8 +270,9 @@ public class DiseaseInputParser {
             allUserInputs.add("7800000");
             allUserInputs.add("10");
         } else {
+            Console c = System.console();
             for (int i = 0; i < 10; i++) {
-                allUserInputs.set(i, System.console().readLine());
+                allUserInputs.add(c.readLine());
             }
         }
 

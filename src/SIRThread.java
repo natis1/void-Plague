@@ -81,7 +81,7 @@ public class SIRThread extends Thread {
             advanceOneTimestep();
 
         }
-        System.out.println("Time taken: " + (System.nanoTime() - startTime) + " ns");
+        System.out.println("Time taken: " + ((System.nanoTime() - startTime)/1000000) + " ms");
 
     }
 
