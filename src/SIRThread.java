@@ -53,9 +53,11 @@ public class SIRThread extends Thread {
 
     private void advanceOneTimestep () {
 
-        recovered = recovered.add( (infected.multiply(recoveryRate).multiply(timerate)) );
-        infected = infected.add( (susceptible.multiply(infected.multiply(infectionRate)))
-                .subtract(infected.multiply(recoveryRate))).multiply(timerate);
+        Apfloat tempI = infected;
+
+        recovered = recovered.add( (tempI.multiply(recoveryRate).multiply(timerate)) );
+        infected = tempI.add((susceptible.multiply(tempI.multiply(infectionRate))).multiply(timerate))
+                .subtract(((tempI.multiply(recoveryRate))).multiply(timerate));
         susceptible = (new Apfloat(1)).subtract(recovered).subtract(infected);
 
         if (infected.doubleValue() > maxInfected.doubleValue()){
@@ -65,7 +67,7 @@ public class SIRThread extends Thread {
 
 
         timestep = timestep.add(timerate);
-        if (timestep.longValue() > 500 || timestep.longValue() > 100 && infected.doubleValue() < .0001){
+        if (timestep.longValue() > 500 || (timestep.longValue() > 100 && infected.doubleValue() < .0001)){
             countDownLatch.countDown();
             didComplete = true;
         }
