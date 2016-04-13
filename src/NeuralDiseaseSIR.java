@@ -5,18 +5,20 @@ import java.util.Vector;
 
 public class NeuralDiseaseSIR {
 
-    private int population = 7900;
-    private int residentialDensity = 100; //per km^2
+    private int population = 500000;
+    private int residentialDensity = 50000; //per km^2
     private int cityXSize = 10; //In km
     private int cityYSize = 10;
 	private int interactionRadius = 2;
 
-    private double infectionRate = 0.5;
+    private int lastPrintedTimestep = 0;
+
+    private double infectionRate = 1;
     private double recoveryRate  = 0.333;
 
 
     private double chanceOfHealthyLeavingHome = 0.90;
-    private double chanceOfSickLeavingHome    = 0.60;
+    private double chanceOfSickLeavingHome    = 0.50;
     private double timeStepLength = 0.001;
     private double timeStep       = 0;
 
@@ -159,13 +161,17 @@ public class NeuralDiseaseSIR {
 
     protected void movePersonOutsideHome(int person){
         int index = -people[person][1];
-        int[] possibleShops = shopLocations.get(index);
-        int randomShop = (int) Math.floor(Math.random() * (double) possibleShops.length);
-        if (randomShop >= possibleShops.length){
-            randomShop = possibleShops.length - 1; //This should be rare
-        }
+        if (index >= 0){
+            if (shopLocations.get(index).length != 0){
+                int[] possibleShops = shopLocations.get(index);
+                int randomShop = (int) Math.floor(Math.random() * (double) possibleShops.length);
+                if (randomShop >= possibleShops.length){
+                    randomShop = possibleShops.length - 1; //This should be rare
+                }
 
-        people[person][0] = possibleShops[randomShop];
+                people[person][0] = possibleShops[randomShop];
+            }
+        }
     }
 
 
@@ -181,10 +187,10 @@ public class NeuralDiseaseSIR {
             if (people[i][3] != -1){
                 if (people[i][1] == people[i][0] && timeStepsAtLocation[i] <= 0){
                     //Resets the time spend outside. Extraverts spend lots more time out compared to intraverts
-                    if (people[i][3] <= 0 && chanceOfHealthyLeavingHome > Math.random()){
+                    if (people[i][3] == 0 && chanceOfHealthyLeavingHome > Math.random()){
                         timeStepsAtLocation[i] = (double) people[i][2] / 750000.0;
                         movePersonOutsideHome(i);
-                    } else if (people[i][3] <= 0 && chanceOfSickLeavingHome > Math.random()){
+                    } else if (people[i][3] > 0 && chanceOfSickLeavingHome > Math.random()){
                         timeStepsAtLocation[i] = (double) people[i][2] / 750000.0;
                         movePersonOutsideHome(i);
                     } else {
@@ -227,10 +233,14 @@ public class NeuralDiseaseSIR {
         }
         recoveredPopulation = population - infectedPopulation - susceptiblePopulation;
         timeStep += timeStepLength;
-        System.out.println("at timestep " + timeStep);
-        System.out.println("S: " + susceptiblePopulation);
-        System.out.println("I: " + infectedPopulation);
-        System.out.println("R: " + recoveredPopulation);
+        if (timeStep > lastPrintedTimestep){
+            System.out.println("at timestep " + timeStep);
+            System.out.println("S: " + susceptiblePopulation);
+            System.out.println("I: " + infectedPopulation);
+            System.out.println("R: " + recoveredPopulation);
+            lastPrintedTimestep++;
+        }
+
 
     }
 
