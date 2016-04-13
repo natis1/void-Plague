@@ -7,9 +7,6 @@ import java.util.Vector;
 
 import org.apfloat.Apfloat;
 
-/**
- * Created by scc on 4/4/2016.
- */
 public class DiseaseInputParser {
 
 
@@ -27,22 +24,36 @@ public class DiseaseInputParser {
     public DiseaseInputParser () {
         processorThreads = Runtime.getRuntime().availableProcessors();
 
-        NeuralDiseaseSIR runMe = new NeuralDiseaseSIR();
+        try {
+            NeuralDiseaseSIR runMe = new NeuralDiseaseSIR();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
 
 
-        //runDieseaseModeller();
+        //runDiseaseModeller();
     }
 
     public DiseaseInputParser (int threads) {
         processorThreads = threads;
-        NeuralDiseaseSIR runMe = new NeuralDiseaseSIR();
-        //runDieseaseModeller();
+
+        try {
+            NeuralDiseaseSIR runMe = new NeuralDiseaseSIR();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        //runDiseaseModeller();
 
 
 
     }
 
-    private void runDieseaseModeller () {
+    private void runDiseaseModeller() {
         ArrayList<Double> inputData = convertUserInputsToSuperFloat(getUserInputs());
 
         startingSusceptible = new Apfloat(inputData.get(8) - inputData.get(9));

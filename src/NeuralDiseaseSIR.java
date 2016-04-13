@@ -1,4 +1,7 @@
 import java.awt.*;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Vector;
@@ -10,6 +13,8 @@ public class NeuralDiseaseSIR {
     private int cityXSize = 10; //In km
     private int cityYSize = 10;
 	private int interactionRadius = 2;
+    private int recoveredPopulation = 0;
+    private int infectedPopulation = 10;
 
     private int lastPrintedTimestep = 0;
 
@@ -18,8 +23,8 @@ public class NeuralDiseaseSIR {
 
 
     private double chanceOfHealthyLeavingHome = 0.90;
-    private double chanceOfSickLeavingHome    = 0.50;
-    private double timeStepLength = 0.001;
+    private double chanceOfSickLeavingHome    = 0.80;
+    private double timeStepLength = 0.01;
     private double timeStep       = 0;
 
 
@@ -31,15 +36,19 @@ public class NeuralDiseaseSIR {
     private ArrayList<Point> houseIndex;
 	private Vector<int[]> shopLocations;
     private ArrayList<Point> shopIndex;
-	
+
 	
 
     private int unusedCityArea = 2; //The rest will be commercial and industrial. measured in sq km
 
 
 
+    private PrintWriter fileWriter;
+    protected NeuralDiseaseSIR() throws FileNotFoundException, UnsupportedEncodingException {
 
-    protected NeuralDiseaseSIR(){
+        fileWriter = new PrintWriter("NeuralDisease.csv", "UTF-8");
+
+
 
         int[][] cityRCI = new int[cityXSize][cityYSize]; //Positive = residential, Neg = unused, 0 = industrial/commercial
 
@@ -129,10 +138,12 @@ public class NeuralDiseaseSIR {
         locationalInfections = new int[shopIndex.size()];
 
 
-        while (timeStep < 300){
+        while (timeStep < 300 && infectedPopulation > 0){
             runSimulationTick();
         }
 
+
+        fileWriter.close();
 
         //TODO: Make a new disease model
     }
@@ -178,8 +189,8 @@ public class NeuralDiseaseSIR {
     protected void runSimulationTick() {
         //Iter over the entire damn world while we are at it :O.
         int susceptiblePopulation = 0;
-        int infectedPopulation = 0;
-        int recoveredPopulation = 0;
+        infectedPopulation = 0;
+
 
 
         for (int i = 0; i < population; i++){
@@ -233,6 +244,9 @@ public class NeuralDiseaseSIR {
         }
         recoveredPopulation = population - infectedPopulation - susceptiblePopulation;
         timeStep += timeStepLength;
+
+        fileWriter.write("\n" + timeStep + ", " + susceptiblePopulation + ", " + infectedPopulation + ", " + recoveredPopulation);
+
         if (timeStep > lastPrintedTimestep){
             System.out.println("at timestep " + timeStep);
             System.out.println("S: " + susceptiblePopulation);
