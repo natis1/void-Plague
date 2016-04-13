@@ -5,19 +5,24 @@ import java.util.Vector;
 
 public class NeuralDiseaseSIR {
 
-    private int population = 79000;
-    private int residentialDensity = 1000; //per km^2
+    private int population = 7900;
+    private int residentialDensity = 100; //per km^2
     private int cityXSize = 10; //In km
     private int cityYSize = 10;
-	
 	private int interactionRadius = 2;
+
+    private double infectionRate = 0.5;
+    private double recoveryRate  = 0.333;
 
 
     private double chanceOfHealthyLeavingHome = 0.90;
     private double chanceOfSickLeavingHome    = 0.60;
     private double timeStepLength = 0.001;
-	
-	
+    private double timeStep       = 0;
+
+
+
+    private int[]  locationalInfections;
     private int[][] people;//This is gonna be yuge :O
     private double[] timeStepsAtLocation;//This is gonna be yuge too.
 
@@ -45,10 +50,13 @@ public class NeuralDiseaseSIR {
 
         Random locationGenerator = new Random(System.nanoTime());
 
+        System.out.println("Init 1 completed");
 
         while (unusedCityArea >= 0){
-            int x = locationGenerator.nextInt() % cityXSize;
-            int y = locationGenerator.nextInt() % cityYSize;
+            int x = Math.abs(locationGenerator.nextInt() % cityXSize);
+            int y = Math.abs(locationGenerator.nextInt() % cityYSize);
+
+
             if (cityRCI[x][y] == 0){
                 cityRCI[x][y] = -1;
                 unusedCityArea--;
@@ -61,19 +69,24 @@ public class NeuralDiseaseSIR {
         if (populationTilesToGenerate >= cityArea){
             populationTilesToGenerate = cityArea - 1;
         }
-		
+
+        System.out.println("Init 2 completed");
+
 		houseIndex = new ArrayList<>();
 		shopLocations = new Vector<>(populationTilesToGenerate);
 		
         while (populationTilesToGenerate >= 0){
-            int x = locationGenerator.nextInt() % cityXSize;
-            int y = locationGenerator.nextInt() % cityYSize;
+            int x = Math.abs(locationGenerator.nextInt() % cityXSize);
+            int y = Math.abs(locationGenerator.nextInt() % cityYSize);
             if (cityRCI[x][y] == 0){
                 cityRCI[x][y] = 1;
 				houseIndex.add(new Point(x, y));
-                unusedCityArea--;
+                populationTilesToGenerate--;
             }
         }
+
+        System.out.println("Init 3 completed");
+
 		for (int x = 0; x < cityXSize; x++){
 			for (int y = 0; y < cityYSize; y++){
 				if (cityRCI[x][y] == 0){
@@ -81,10 +94,14 @@ public class NeuralDiseaseSIR {
 				}
 			}
 		}
+
+        System.out.println("Init 4 completed");
+
 		for (int x = 0; x < shopLocations.capacity(); x++){
 			shopLocations.add(determineViableShops( (int) houseIndex.get(x).getX(), (int) houseIndex.get(x).getY()));
 		}
-		
+
+
         System.out.println("Was able to produce a city with a population of" +
                 "\n" + populationTiles * residentialDensity + "" +
                 "\nusing these numbers");
@@ -98,8 +115,8 @@ public class NeuralDiseaseSIR {
         }
         for (int i = 0; i < populationTiles; i++){
             for (int l = 0; l < population; l++){
-                people[l][1] = i;
-                people[l][0] = i;
+                people[l][1] = -i;
+                people[l][0] = -i; //homes portrayed as negative location when described by where people live
             }
         }
         int randomPersonToInfect = (int) ((population - 11) * Math.random());
@@ -107,8 +124,14 @@ public class NeuralDiseaseSIR {
             people[randomPersonToInfect + k][3] = 1;
         }
 
+        locationalInfections = new int[shopIndex.size()];
 
-				
+
+        while (timeStep < 300){
+            runSimulationTick();
+        }
+
+
         //TODO: Make a new disease model
     }
 	
@@ -134,24 +157,80 @@ public class NeuralDiseaseSIR {
 		return viableShopIndexes;
 	}
 
+    protected void movePersonOutsideHome(int person){
+        int index = -people[person][1];
+        int[] possibleShops = shopLocations.get(index);
+        int randomShop = (int) Math.floor(Math.random() * (double) possibleShops.length);
+        if (randomShop >= possibleShops.length){
+            randomShop = possibleShops.length - 1; //This should be rare
+        }
+
+        people[person][0] = possibleShops[randomShop];
+    }
+
 
     protected void runSimulationTick() {
         //Iter over the entire damn world while we are at it :O.
-        for (int i = 0; i < population; i++){
-            if (people[i][1] == people[i][0] && timeStepsAtLocation[i] <= 0){
+        int susceptiblePopulation = 0;
+        int infectedPopulation = 0;
+        int recoveredPopulation = 0;
 
-            } else if (people[i][1] != people[i][0] && timeStepsAtLocation[i] <= 0){
-                int tendancy = people[i];
-            } else {
-                timeStepsAtLocation[i] -= timeStepLength;
+
+        for (int i = 0; i < population; i++){
+            //Skip all recovered people to save time
+            if (people[i][3] != -1){
+                if (people[i][1] == people[i][0] && timeStepsAtLocation[i] <= 0){
+                    //Resets the time spend outside. Extraverts spend lots more time out compared to intraverts
+                    if (people[i][3] <= 0 && chanceOfHealthyLeavingHome > Math.random()){
+                        timeStepsAtLocation[i] = (double) people[i][2] / 750000.0;
+                        movePersonOutsideHome(i);
+                    } else if (people[i][3] <= 0 && chanceOfSickLeavingHome > Math.random()){
+                        timeStepsAtLocation[i] = (double) people[i][2] / 750000.0;
+                        movePersonOutsideHome(i);
+                    } else {
+                        timeStepsAtLocation[i] = 1.5 - ((double) people[i][2] / 750000.0);
+                    }
+                } else if (people[i][1] != people[i][0] && timeStepsAtLocation[i] <= 0){
+                    timeStepsAtLocation[i] = 1.5 - ((double) people[i][2] / 750000.0);
+                    people[i][1] = people[i][0]; //Go home, you're drunk
+                } else {
+                    timeStepsAtLocation[i] -= timeStepLength;
+                }
+
+                //First infect anyone who isn't in bed right now.
+                if (people[i][3] == 1 && people[i][0] >= 0 && (infectionRate * timeStepLength) > Math.random()){
+                    locationalInfections[people[i][0]]++;
+                }
+                if (people[i][0] >= 0){
+                    if (locationalInfections[people[i][0]] > 0){
+                        if (people[i][3] == 0){
+                            people[i][3] = 1;
+                            locationalInfections[people[i][0]]--;
+                        }
+                    }
+                }
+                //Now recover those who are sick
+                if (people[i][3] == 1 && (recoveryRate * timeStepLength) > Math.random()){
+                    people[i][3] = -1;
+                }
+
+                //Now count SIR
+                if (people[i][3] == 1){
+                    infectedPopulation++;
+                } else {
+                    susceptiblePopulation++;
+                }
+
+
             }
 
-
         }
-
-
-
-
+        recoveredPopulation = population - infectedPopulation - susceptiblePopulation;
+        timeStep += timeStepLength;
+        System.out.println("at timestep " + timeStep);
+        System.out.println("S: " + susceptiblePopulation);
+        System.out.println("I: " + infectedPopulation);
+        System.out.println("R: " + recoveredPopulation);
 
     }
 

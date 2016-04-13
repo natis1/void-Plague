@@ -26,12 +26,17 @@ public class DiseaseInputParser {
 
     public DiseaseInputParser () {
         processorThreads = Runtime.getRuntime().availableProcessors();
-        runDieseaseModeller();
+
+        NeuralDiseaseSIR runMe = new NeuralDiseaseSIR();
+
+
+        //runDieseaseModeller();
     }
 
     public DiseaseInputParser (int threads) {
         processorThreads = threads;
-        runDieseaseModeller();
+        NeuralDiseaseSIR runMe = new NeuralDiseaseSIR();
+        //runDieseaseModeller();
 
 
 
