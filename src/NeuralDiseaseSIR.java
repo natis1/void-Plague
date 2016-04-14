@@ -8,24 +8,24 @@ import java.util.Vector;
 
 public class NeuralDiseaseSIR {
 
-    private int population = 500000;
-    private int residentialDensity = 50000; //per km^2
-    private int cityXSize = 10; //In km
-    private int cityYSize = 10;
-	private int interactionRadius = 2;
-    private int recoveredPopulation = 0;
+    private int population;
+    //private int residentialDensity = 50000; //per km^2
+    //private int cityXSize = 10; //In km
+    //private int cityYSize = 10;
+	private int interactionRadius;
+    private int recoveredPopulation;
     private int infectedPopulation = 10;
 
     private int lastPrintedTimestep = 0;
 
-    private double infectionRate = 1;
-    private double recoveryRate  = 0.333;
+    private double infectionRate;
+    private double recoveryRate;
 
 
-    private double chanceOfHealthyLeavingHome = 0.90;
-    private double chanceOfSickLeavingHome    = 0.80;
-    private double timeStepLength = 0.01;
-    private double timeStep       = 0;
+    private double chanceOfHealthyLeavingHome;
+    private double chanceOfSickLeavingHome;
+    private double timeStepLength;
+    private double timeStep = 0;
 
 
 
@@ -39,14 +39,29 @@ public class NeuralDiseaseSIR {
 
 	
 
-    private int unusedCityArea = 2; //The rest will be commercial and industrial. measured in sq km
+    //private int unusedCityArea = 2; //The rest will be commercial and industrial. measured in sq km
 
 
 
     private PrintWriter fileWriter;
-    protected NeuralDiseaseSIR() throws FileNotFoundException, UnsupportedEncodingException {
+    protected NeuralDiseaseSIR(double timeStepLength, int population, int residentialDensity, int cityXSize,
+                               int cityYSize, int unusedCityArea, int interactionRadius, double chanceOfHealthyLeavingHome,
+                               double chanceOfSickLeavingHome, double infectionRate, double recoveryRate) throws FileNotFoundException, UnsupportedEncodingException {
+
+
+        //Set all the values given
+
+        this.timeStepLength = timeStepLength;
+        this.interactionRadius = interactionRadius;
+        this.population = population;
+        this.chanceOfHealthyLeavingHome = chanceOfHealthyLeavingHome;
+        this.chanceOfSickLeavingHome = chanceOfSickLeavingHome;
+        this.infectionRate = infectionRate;
+        this.recoveryRate = recoveryRate;
+
 
         fileWriter = new PrintWriter("NeuralDisease.csv", "UTF-8");
+        fileWriter.write("Time, Susceptible, Infected, Recovered\n");
 
 
 
@@ -122,7 +137,7 @@ public class NeuralDiseaseSIR {
 
         timeStepsAtLocation = new double[population];
         for (int t = 0; t < population; t++){
-            people[t][2] = (int) (100000 * (0.25 * Math.random() + 0.75));
+            people[t][2] = (int) (1000000000 * (0.75 * Math.random() + 0.25));
         }
         for (int i = 0; i < populationTiles; i++){
             for (int l = 0; l < population; l++){
@@ -199,16 +214,16 @@ public class NeuralDiseaseSIR {
                 if (people[i][1] == people[i][0] && timeStepsAtLocation[i] <= 0){
                     //Resets the time spend outside. Extraverts spend lots more time out compared to intraverts
                     if (people[i][3] == 0 && chanceOfHealthyLeavingHome > Math.random()){
-                        timeStepsAtLocation[i] = (double) people[i][2] / 750000.0;
+                        timeStepsAtLocation[i] = (double) people[i][2] / 750000000.0;
                         movePersonOutsideHome(i);
                     } else if (people[i][3] > 0 && chanceOfSickLeavingHome > Math.random()){
-                        timeStepsAtLocation[i] = (double) people[i][2] / 750000.0;
+                        timeStepsAtLocation[i] = (double) people[i][2] / 750000000.0;
                         movePersonOutsideHome(i);
                     } else {
-                        timeStepsAtLocation[i] = 1.5 - ((double) people[i][2] / 750000.0);
+                        timeStepsAtLocation[i] = 1.5 - ((double) people[i][2] / 750000000.0);
                     }
                 } else if (people[i][1] != people[i][0] && timeStepsAtLocation[i] <= 0){
-                    timeStepsAtLocation[i] = 1.5 - ((double) people[i][2] / 750000.0);
+                    timeStepsAtLocation[i] = 1.5 - ((double) people[i][2] / 750000000.0);
                     people[i][1] = people[i][0]; //Go home, you're drunk
                 } else {
                     timeStepsAtLocation[i] -= timeStepLength;
@@ -245,7 +260,7 @@ public class NeuralDiseaseSIR {
         recoveredPopulation = population - infectedPopulation - susceptiblePopulation;
         timeStep += timeStepLength;
 
-        fileWriter.write("\n" + timeStep + ", " + susceptiblePopulation + ", " + infectedPopulation + ", " + recoveredPopulation);
+        fileWriter.write(timeStep + ", " + susceptiblePopulation + ", " + infectedPopulation + ", " + recoveredPopulation + "\n");
 
         if (timeStep > lastPrintedTimestep){
             System.out.println("at timestep " + timeStep);
