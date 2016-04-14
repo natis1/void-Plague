@@ -1,7 +1,4 @@
-import java.io.Console;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Vector;
 
@@ -18,28 +15,36 @@ public class DiseaseInputParser {
     private Apfloat startingSusceptible;
     private Apfloat startingInfected;
 
+    private boolean hasInputFile = false;
+    private String inputFileLocation;
 
     public DiseaseInputParser () {
         processorThreads = Runtime.getRuntime().availableProcessors();
-
-
-
-
         runDiseaseModeller();
     }
 
     public DiseaseInputParser (int threads) {
         processorThreads = threads;
-
-
         runDiseaseModeller();
+    }
 
-
-
+    public DiseaseInputParser (String inputFileLocation){
+        this.inputFileLocation = inputFileLocation;
+        processorThreads = Runtime.getRuntime().availableProcessors();
+        hasInputFile = true;
+        runDiseaseModeller();
     }
 
     private void runDiseaseModeller() {
-        ArrayList<Double> inputData = convertUserInputsToSuperFloat(getUserInputs());
+
+        ArrayList<Double> inputData;
+
+
+        if (hasInputFile){
+            inputData = parseInputFile();
+        } else {
+            inputData = convertUserInputsToSuperFloat(getUserInputs());
+        }
 
         switch (inputData.get(0).intValue()){
             case 0:
@@ -244,6 +249,41 @@ public class DiseaseInputParser {
 
 
 
+    }
+
+
+
+    private ArrayList<Double> parseInputFile(){
+        ArrayList<Double> userInputFloatingPoints = new ArrayList<Double>();
+
+
+        // FileReader reads text files in the default encoding.
+        FileReader fileReader = null;
+
+
+        try {
+            fileReader = new FileReader(inputFileLocation);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            System.out.println("Unable to find that file, please specify one that actually exists");
+            System.exit(404);
+        }
+        // Always wrap FileReader in BufferedReader.
+        BufferedReader bufferedReader =
+                new BufferedReader(fileReader);
+
+        for (int i = 0; i < 12; i++){
+            try {
+                userInputFloatingPoints.add(Double.parseDouble(bufferedReader.readLine()));
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("You formatted your file improperly, the file is just 12 numbers separated by a return char.");
+                System.exit(405);
+            }
+        }
+
+
+        return userInputFloatingPoints;
     }
 
 

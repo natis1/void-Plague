@@ -60,7 +60,8 @@ public class NeuralDiseaseSIR {
         this.recoveryRate = recoveryRate;
 
 
-        fileWriter = new PrintWriter("NeuralDisease.csv", "UTF-8");
+        fileWriter = new PrintWriter("NeuralP" + population + "D" + residentialDensity +
+                "I" + infectionRate + "R" + recoveryRate + ".csv", "UTF-8");
         fileWriter.write("Time, Susceptible, Infected, Recovered\n");
 
 
