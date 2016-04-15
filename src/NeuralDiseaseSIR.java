@@ -46,10 +46,15 @@ public class NeuralDiseaseSIR {
     private PrintWriter fileWriter;
     protected NeuralDiseaseSIR(double timeStepLength, int population, int residentialDensity, int cityXSize,
                                int cityYSize, int unusedCityArea, int interactionRadius, double chanceOfHealthyLeavingHome,
-                               double chanceOfSickLeavingHome, double infectionRate, double recoveryRate) throws FileNotFoundException, UnsupportedEncodingException {
+                               double chanceOfSickLeavingHome, double infectionRate, double recoveryRate, boolean isQuiet) throws FileNotFoundException, UnsupportedEncodingException {
 
 
         //Set all the values given
+
+        if (isQuiet){
+            lastPrintedTimestep = 50000;
+        }
+
 
         this.timeStepLength = timeStepLength;
         this.interactionRadius = interactionRadius;
@@ -60,9 +65,7 @@ public class NeuralDiseaseSIR {
         this.recoveryRate = recoveryRate;
 
 
-        fileWriter = new PrintWriter("NeuralP" + population + "D" + residentialDensity +
-                "I" + infectionRate + "R" + recoveryRate + ".csv", "UTF-8");
-        fileWriter.write("Time, Susceptible, Infected, Recovered\n");
+
 
 
 
@@ -133,10 +136,19 @@ public class NeuralDiseaseSIR {
                 "\n" + populationTiles * residentialDensity + "" +
                 "\nusing these numbers");
 
+        fileWriter = new PrintWriter("NeuralP" + population + "D" + residentialDensity +
+                "I" + infectionRate + "R" + recoveryRate + ".csv", "UTF-8");
+
+        fileWriter.write("Population, density, infection rate, recovery rate," +
+                "chance for sick to leave, chance for healthy to leave, interaction radius\n");
+        fileWriter.write((populationTiles * residentialDensity) + ", " + residentialDensity + ", " + infectionRate + ", " + recoveryRate + ", "
+        + ", " + chanceOfSickLeavingHome + ", " + chanceOfHealthyLeavingHome + ", " + interactionRadius + "\n");
+        fileWriter.write("Time, Susceptible, Infected, Recovered\n");
+
         people = new int[(int)(populationTiles * residentialDensity)][4]; //0 is current location, 1 is home location,
         // 2 is tendency to leave house, 3 is SIR status
 
-        timeStepsAtLocation = new double[population];
+        timeStepsAtLocation = new double[(int)(populationTiles * residentialDensity)];
         for (int t = 0; t < population; t++){
             people[t][2] = (int) (1000000000 * (0.75 * Math.random() + 0.25));
         }

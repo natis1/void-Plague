@@ -55,8 +55,8 @@ public class DiseaseInputParser {
                 if (totalXToTest < 0){
                     totalXToTest =- totalXToTest;
                 } if (totalYToTest < 0){
-                totalYToTest =- totalYToTest;
-            }
+                    totalYToTest =- totalYToTest;
+                }
                 long totalBufferSize = totalXToTest * totalYToTest;
                 if (totalBufferSize < (Runtime.getRuntime().maxMemory() / 128)){
                     double[][] maxInfectedBuffer         = new double[(int)totalXToTest][(int)totalYToTest];
@@ -233,7 +233,7 @@ public class DiseaseInputParser {
                     NeuralDiseaseSIR runMe = new NeuralDiseaseSIR(inputData.get(1), inputData.get(2).intValue(),
                             inputData.get(3).intValue(), inputData.get(4).intValue(), inputData.get(5).intValue(),
                             inputData.get(6).intValue(), inputData.get(7).intValue(), inputData.get(8), inputData.get(9),
-                            inputData.get(10), inputData.get(11));
+                            inputData.get(10), inputData.get(11), false);
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 } catch (UnsupportedEncodingException e) {
@@ -243,12 +243,78 @@ public class DiseaseInputParser {
 
                 break;
 
+            case 2:
+                Double[][] khaZixStorage = new Double[4][3];
+                int[]    runPlagueNTimes = new int[4];
+                khaZixStorage[0][0] = inputData.get(2);
+                khaZixStorage[0][1] = inputData.get(3);
+                khaZixStorage[0][2] = inputData.get(4);
+                khaZixStorage[1][0] = inputData.get(5);
+                khaZixStorage[1][1] = inputData.get(6);
+                khaZixStorage[1][2] = inputData.get(7);
+                khaZixStorage[2][0] = inputData.get(14);
+                khaZixStorage[2][1] = inputData.get(15);
+                khaZixStorage[2][2] = inputData.get(16);
+                khaZixStorage[3][0] = inputData.get(17);
+                khaZixStorage[3][1] = inputData.get(18);
+                khaZixStorage[3][2] = inputData.get(19);
+                int bufferSize = 1;
 
+                for (int i = 0; i < 4; i++){
+                    if (khaZixStorage[i][0] == khaZixStorage[i][1]){
+                        runPlagueNTimes[i] = 0;
+                    } else {
+                        runPlagueNTimes[i] = (int) ((khaZixStorage[i][1] - khaZixStorage[i][0])/khaZixStorage[i][2]);
+                        bufferSize *= runPlagueNTimes[i];
+                    }
+                }
+                ArrayList<NeuralSIRThread> threadManager = new ArrayList<NeuralSIRThread>();
+                for (int populationMult = 0; populationMult < runPlagueNTimes[0]; populationMult++){
+                    for (int densityMult = 0; densityMult < runPlagueNTimes[1]; densityMult++){
+                        for (int infectMult = 0; infectMult < runPlagueNTimes[2]; infectMult++){
+                            for (int recoveryMult = 0; recoveryMult < runPlagueNTimes[3]; recoveryMult++){
+                                //WOW 4 freaking for loops what has this world become?
+                                    if (runningThreads < processorThreads){
+                                        runningThreads++;
+                                        threadManager.add(new NeuralSIRThread(inputData.get(1),
+                                                (int) (khaZixStorage[0][0] + (khaZixStorage[0][2] * populationMult)),
+                                                (int) (khaZixStorage[1][0] + (khaZixStorage[1][2] * densityMult)),
+                                                (khaZixStorage[2][0] + (khaZixStorage[2][2] * infectMult)),
+                                                (khaZixStorage[3][0] + (khaZixStorage[3][2] * recoveryMult)),
+                                                inputData.get(8).intValue(), inputData.get(9).intValue(), inputData.get(10).intValue(),
+                                                inputData.get(11).intValue(), inputData.get(12), inputData.get(13)));
+                                        threadManager.get(threadManager.size() - 1).start();
+                                    } else {
+                                        while (runningThreads >= processorThreads) {
+                                            try {
+                                                Thread.sleep(50); // Why not, good time to check
+                                                //Going in reverse order index out of bounds error.
+                                                for (int i = threadManager.size() - 1; i >= 0; i--) {
+                                                    //Just kidding 5 nested loops
 
+                                                    if (threadManager.get(i).didFinish){
+                                                        runningThreads--;
+                                                        bufferSize--;
+                                                        System.out.println(bufferSize + " operations left to complete, I think");
+                                                        threadManager.remove(i);
+                                                    }
+                                                }
+                                            } catch (InterruptedException e) {
+                                                e.printStackTrace();
+                                                System.out.println("\nJust a heads up something went wrong while the manager was sleeping" +
+                                                        "\nthis was probably you interrupting it\n Attempting to continue regardless");
+                                            }
+                                        }
+
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+
+                break;
         }
-
-
-
     }
 
 
@@ -259,20 +325,29 @@ public class DiseaseInputParser {
 
         // FileReader reads text files in the default encoding.
         FileReader fileReader = null;
-
+        LineNumberReader lnr  = null;
 
         try {
             fileReader = new FileReader(inputFileLocation);
+            lnr = new LineNumberReader(fileReader);
+            lnr.skip(Long.MAX_VALUE);
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             System.out.println("Unable to find that file, please specify one that actually exists");
             System.exit(404);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Unable to do something, I don't even know.");
+            System.exit(403);
         }
-        // Always wrap FileReader in BufferedReader.
-        BufferedReader bufferedReader =
-                new BufferedReader(fileReader);
+        BufferedReader bufferedReader = new BufferedReader(fileReader);
 
-        for (int i = 0; i < 12; i++){
+
+
+
+
+        for (int i = 0; i < lnr.getLineNumber(); i++){
             try {
                 userInputFloatingPoints.add(Double.parseDouble(bufferedReader.readLine()));
             } catch (IOException e) {
@@ -290,12 +365,12 @@ public class DiseaseInputParser {
 
 
 
-    private Vector<String> getUserInputs () {
-        Vector<String> allUserInputs = new Vector<String>(10);
+    private ArrayList<String> getUserInputs () {
+        ArrayList<String> allUserInputs = new ArrayList<String>();
 
         System.out.println("Hello and welcome to Void Plague disease calculator");
 
-        System.out.println("Please enter the method you want to calculate diseases (neural, basic)");
+        System.out.println("Please enter the method you want to calculate diseases (neural, basic, multi neural)");
 
 
 
@@ -314,12 +389,42 @@ public class DiseaseInputParser {
             Console c = System.console();
             String methodToUse = c.readLine();
             if (methodToUse.contains("neural") || methodToUse.contains("Neural")){
-                System.out.println("In order, enter 1, timestep size, population, population density, city X, city Y, unused city tiles," +
-                        "interaction radius, chance for healthy to leave house, chance for sick to leave house infection rate, and recovery rate");
-                for (int i = 0; i < 12; i++) {
+                if ((methodToUse.contains("multi"))){
+                    System.out.println("Enter 2 and timestep size");
                     allUserInputs.add(c.readLine());
-                }
+                    allUserInputs.add(c.readLine());
+                    System.out.println("Enter minimum population, maximum population, and population step");//2-4 = pop
+                    allUserInputs.add(c.readLine());
+                    allUserInputs.add(c.readLine());
+                    allUserInputs.add(c.readLine());
+                    System.out.println("Enter minimum population density, maximum density, and density range");//5-7 = density
+                    allUserInputs.add(c.readLine());
+                    allUserInputs.add(c.readLine());
+                    allUserInputs.add(c.readLine());
+                    System.out.println("Enter city X size, city Y size, and number of unused city tiles");
+                    allUserInputs.add(c.readLine());
+                    allUserInputs.add(c.readLine());
+                    allUserInputs.add(c.readLine());
+                    System.out.println("Enter person interaction radius, chance for healthy people to leave home, and chance for the sick to leave home");
+                    allUserInputs.add(c.readLine());
+                    allUserInputs.add(c.readLine());
+                    allUserInputs.add(c.readLine());
+                    System.out.println("Enter minimum infection rate, maximum infection rate, and infection rate step");//14-16 = infection
+                    allUserInputs.add(c.readLine());
+                    allUserInputs.add(c.readLine());
+                    allUserInputs.add(c.readLine());
+                    System.out.println("Enter minimum recovery rate, maximum recovery rate, and recovery rate step");//17-19 = recovery
+                    allUserInputs.add(c.readLine());
+                    allUserInputs.add(c.readLine());
+                    allUserInputs.add(c.readLine());
 
+                } else {
+                    System.out.println("In order, enter 1, timestep size, population, population density, city X, city Y, unused city tiles," +
+                            "interaction radius, chance for healthy to leave house, chance for sick to leave house infection rate, and recovery rate");
+                    for (int i = 0; i < 12; i++) {
+                        allUserInputs.add(c.readLine());
+                    }
+                }
             } else if (methodToUse.contains("basic") || methodToUse.contains("Basic")){
                 System.out.println("\nIn order, enter 0, timestep size, starting and ending infection rate, infection size step, starting and ending recovery rate, and recovery timestep. Finally, total people and infected people");
                 for (int i = 0; i < 10; i++) {
@@ -336,7 +441,7 @@ public class DiseaseInputParser {
         return allUserInputs;
     }
 
-    private ArrayList<Double> convertUserInputsToSuperFloat (Vector<String> userInputs) {
+    private ArrayList<Double> convertUserInputsToSuperFloat (ArrayList<String> userInputs) {
         ArrayList<Double> userInputFloatingPoints = new ArrayList<Double>();
         for (int i = 0; i < userInputs.size(); i++){
             userInputFloatingPoints.add(Double.parseDouble(userInputs.get(i)));
