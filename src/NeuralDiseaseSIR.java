@@ -37,6 +37,8 @@ public class NeuralDiseaseSIR {
 	private Vector<int[]> shopLocations;
     private ArrayList<Point> shopIndex;
 
+    private Random neuralRNG = new Random(System.nanoTime());
+
 	
 
     //private int unusedCityArea = 2; //The rest will be commercial and industrial. measured in sq km
@@ -136,7 +138,7 @@ public class NeuralDiseaseSIR {
                 "\n" + populationTiles * residentialDensity + "" +
                 "\nusing these numbers");
 
-        fileWriter = new PrintWriter("NeuralP" + population + "D" + residentialDensity +
+        fileWriter = new PrintWriter("infectionCSV/NeuralP" + population + "D" + residentialDensity +
                 "I" + infectionRate + "R" + recoveryRate + ".csv", "UTF-8");
 
         fileWriter.write("Population, density, infection rate, recovery rate," +

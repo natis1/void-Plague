@@ -229,6 +229,12 @@ public class DiseaseInputParser {
                 break;
             case 1:
 
+                if (new File("infectionCSV").mkdir()){
+                    System.out.println("Created directory for output files");
+                } else {
+                    System.out.println("Unable to create output file directory, this may not be an error in some cases");
+                }
+
                 try {
                     NeuralDiseaseSIR runMe = new NeuralDiseaseSIR(inputData.get(1), inputData.get(2).intValue(),
                             inputData.get(3).intValue(), inputData.get(4).intValue(), inputData.get(5).intValue(),
@@ -244,6 +250,14 @@ public class DiseaseInputParser {
                 break;
 
             case 2:
+
+                if (new File("infectionCSV").mkdir()){
+                    System.out.println("Created directory for output files");
+                } else {
+                    System.out.println("Unable to create output file directory, either you don't have permissions or it already exists");
+                }
+
+
                 Double[][] khaZixStorage = new Double[4][3];
                 int[]    runPlagueNTimes = new int[4];
                 khaZixStorage[0][0] = inputData.get(2);
