@@ -152,7 +152,7 @@ public class NeuralDiseaseSIR {
 
         timeStepsAtLocation = new double[(int)(populationTiles * residentialDensity)];
         for (int t = 0; t < population; t++){
-            people[t][2] = (int) (1000000000 * (0.75 * Math.random() + 0.25));
+            people[t][2] = (int) (1000000000 * (0.75 * neuralRNG.nextDouble() + 0.25));
         }
         for (int i = 0; i < populationTiles; i++){
             for (int l = 0; l < population; l++){
@@ -160,7 +160,7 @@ public class NeuralDiseaseSIR {
                 people[l][0] = -i; //homes portrayed as negative location when described by where people live
             }
         }
-        int randomPersonToInfect = (int) ((population - 11) * Math.random());
+        int randomPersonToInfect = (int) ((population - 11) * neuralRNG.nextDouble());
         for (int k = 0; k < 10; k++){
             people[randomPersonToInfect + k][3] = 1;
         }
@@ -205,7 +205,7 @@ public class NeuralDiseaseSIR {
         if (index >= 0){
             if (shopLocations.get(index).length != 0){
                 int[] possibleShops = shopLocations.get(index);
-                int randomShop = (int) Math.floor(Math.random() * (double) possibleShops.length);
+                int randomShop = (int) Math.floor(neuralRNG.nextDouble() * (double) possibleShops.length);
                 if (randomShop >= possibleShops.length){
                     randomShop = possibleShops.length - 1; //This should be rare
                 }
@@ -228,10 +228,10 @@ public class NeuralDiseaseSIR {
             if (people[i][3] != -1){
                 if (people[i][1] == people[i][0] && timeStepsAtLocation[i] <= 0){
                     //Resets the time spend outside. Extraverts spend lots more time out compared to intraverts
-                    if (people[i][3] == 0 && chanceOfHealthyLeavingHome > Math.random()){
+                    if (people[i][3] == 0 && chanceOfHealthyLeavingHome > neuralRNG.nextDouble()){
                         timeStepsAtLocation[i] = (double) people[i][2] / 750000000.0;
                         movePersonOutsideHome(i);
-                    } else if (people[i][3] > 0 && chanceOfSickLeavingHome > Math.random()){
+                    } else if (people[i][3] > 0 && chanceOfSickLeavingHome > neuralRNG.nextDouble()){
                         timeStepsAtLocation[i] = (double) people[i][2] / 750000000.0;
                         movePersonOutsideHome(i);
                     } else {
@@ -245,7 +245,7 @@ public class NeuralDiseaseSIR {
                 }
 
                 //First infect anyone who isn't in bed right now.
-                if (people[i][3] == 1 && people[i][0] >= 0 && (infectionRate * timeStepLength) > Math.random()){
+                if (people[i][3] == 1 && people[i][0] >= 0 && (infectionRate * timeStepLength) > neuralRNG.nextDouble()){
                     locationalInfections[people[i][0]]++;
                 }
                 if (people[i][0] >= 0){
@@ -257,7 +257,7 @@ public class NeuralDiseaseSIR {
                     }
                 }
                 //Now recover those who are sick
-                if (people[i][3] == 1 && (recoveryRate * timeStepLength) > Math.random()){
+                if (people[i][3] == 1 && (recoveryRate * timeStepLength) > neuralRNG.nextDouble()){
                     people[i][3] = -1;
                 }
 
