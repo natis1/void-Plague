@@ -328,7 +328,7 @@ public class DiseaseInputParser {
                                                     if (threadManager.get(i).didFinish){
                                                         runningThreads--;
                                                         bufferSize--;
-                                                        System.out.println(bufferSize + " operations left to complete, I think");
+                                                        System.out.println(bufferSize + " operations left to complete.");
 
                                                         maxInfectedBuffer[threadManager.get(i).SIRRunner.pointLocation[0]]
                                                                 [threadManager.get(i).SIRRunner.pointLocation[1]]
