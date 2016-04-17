@@ -39,6 +39,13 @@ public class NeuralDiseaseSIR {
     private ArrayList<Point> shopIndex;
 
     private Random neuralRNG = new Random(System.nanoTime());
+    private boolean isQuiet;
+
+
+
+    public int maxInfected = 0;
+    public int totalInfected = 0;
+    public int[] pointLocation;
 
 	
 
@@ -49,11 +56,13 @@ public class NeuralDiseaseSIR {
     private PrintWriter fileWriter;
     protected NeuralDiseaseSIR(double timeStepLength, int population, int residentialDensity, int cityXSize,
                                int cityYSize, int unusedCityArea, int interactionRadius, double chanceOfHealthyLeavingHome,
-                               double chanceOfSickLeavingHome, double infectionRate, double recoveryRate, boolean isQuiet) throws FileNotFoundException, UnsupportedEncodingException {
+                               double chanceOfSickLeavingHome, double infectionRate, double recoveryRate, boolean isQuiet, int[] pointLocation) throws FileNotFoundException, UnsupportedEncodingException {
 
 
         //Set all the values given
 
+
+        this.isQuiet = isQuiet;
         if (isQuiet){
             lastPrintedTimestep = 50000;
         }
@@ -66,6 +75,7 @@ public class NeuralDiseaseSIR {
         this.chanceOfSickLeavingHome = chanceOfSickLeavingHome;
         this.infectionRate = infectionRate;
         this.recoveryRate = recoveryRate;
+        this.pointLocation = pointLocation;
 
 
 
@@ -142,14 +152,18 @@ public class NeuralDiseaseSIR {
 
         System.out.println("City Size: " + populationTiles * residentialDensity);
 
-        fileWriter = new PrintWriter("infectionCSV/NeuralP" + population + "D" + residentialDensity +
-                "I" + new DecimalFormat("#.##").format(infectionRate) + "R" + new DecimalFormat("#.##").format(recoveryRate) + ".csv", "UTF-8");
 
-        fileWriter.write("Population, density, infection rate, recovery rate," +
-                "chance for sick to leave, chance for healthy to leave, interaction radius\n");
-        fileWriter.write((populationTiles * residentialDensity) + ", " + residentialDensity + ", " + infectionRate + ", " + recoveryRate + ", "
-        + ", " + chanceOfSickLeavingHome + ", " + chanceOfHealthyLeavingHome + ", " + interactionRadius + "\n");
-        fileWriter.write("Time, Susceptible, Infected, Recovered\n");
+
+        if (!isQuiet){
+            fileWriter = new PrintWriter("infectionCSV/NeuralP" + population + "D" + residentialDensity +
+                    "I" + new DecimalFormat("#.##").format(infectionRate) + "R" + new DecimalFormat("#.##").format(recoveryRate) + ".csv", "UTF-8");
+            fileWriter.write("Population, density, infection rate, recovery rate," +
+                    "chance for sick to leave, chance for healthy to leave, interaction radius\n");
+            fileWriter.write((populationTiles * residentialDensity) + ", " + residentialDensity + ", " + infectionRate + ", " + recoveryRate + ", "
+                    + ", " + chanceOfSickLeavingHome + ", " + chanceOfHealthyLeavingHome + ", " + interactionRadius + "\n");
+            fileWriter.write("Time, Susceptible, Infected, Recovered\n");
+        }
+
 
         people = new int[(int)(populationTiles * residentialDensity)][4]; //0 is current location, 1 is home location,
         // 2 is tendency to leave house, 3 is SIR status
@@ -175,9 +189,12 @@ public class NeuralDiseaseSIR {
         while (timeStep < 300 && infectedPopulation > 0){
             runSimulationTick();
         }
+        totalInfected = infectedPopulation + recoveredPopulation + 1;//not sure why 1 needs to be added here but it makes it work.
 
+        if (!isQuiet){
+            fileWriter.close();
+        }
 
-        fileWriter.close();
 
         //TODO: Make a new disease model
     }
@@ -276,10 +293,15 @@ public class NeuralDiseaseSIR {
             }
 
         }
+        if (infectedPopulation > maxInfected){
+            maxInfected = infectedPopulation;
+        }
         recoveredPopulation = population - infectedPopulation - susceptiblePopulation;
         timeStep += timeStepLength;
 
-        fileWriter.write(timeStep + ", " + susceptiblePopulation + ", " + infectedPopulation + ", " + recoveredPopulation + "\n");
+        if (!isQuiet){
+            fileWriter.write(timeStep + ", " + susceptiblePopulation + ", " + infectedPopulation + ", " + recoveredPopulation + "\n");
+        }
 
         if (timeStep > lastPrintedTimestep){
             System.out.println("at timestep " + timeStep);

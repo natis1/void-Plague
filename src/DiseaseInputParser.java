@@ -1,5 +1,7 @@
 import java.io.*;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.Vector;
 
 import org.apfloat.Apfloat;
@@ -31,6 +33,13 @@ public class DiseaseInputParser {
     public DiseaseInputParser (String inputFileLocation){
         this.inputFileLocation = inputFileLocation;
         processorThreads = Runtime.getRuntime().availableProcessors();
+        hasInputFile = true;
+        runDiseaseModeller();
+    }
+
+    public DiseaseInputParser (String inputFileLocation, int threads){
+        this.inputFileLocation = inputFileLocation;
+        processorThreads = threads;
         hasInputFile = true;
         runDiseaseModeller();
     }
@@ -239,7 +248,7 @@ public class DiseaseInputParser {
                     NeuralDiseaseSIR runMe = new NeuralDiseaseSIR(inputData.get(1), inputData.get(2).intValue(),
                             inputData.get(3).intValue(), inputData.get(4).intValue(), inputData.get(5).intValue(),
                             inputData.get(6).intValue(), inputData.get(7).intValue(), inputData.get(8), inputData.get(9),
-                            inputData.get(10), inputData.get(11), false);
+                            inputData.get(10), inputData.get(11), false, new int[3]);
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 } catch (UnsupportedEncodingException e) {
@@ -283,6 +292,8 @@ public class DiseaseInputParser {
                     }
                 }
 
+                int[][][] maxInfectedBuffer = new int[runPlagueNTimes[1]] [runPlagueNTimes[2]] [runPlagueNTimes[3]];
+                int[][][] totalInfectedBuffer = new int[runPlagueNTimes[1]] [runPlagueNTimes[2]] [runPlagueNTimes[3]];
 
                 System.out.println("Created buffer for program.");
                 ArrayList<NeuralSIRThread> threadManager = new ArrayList<NeuralSIRThread>();
@@ -291,7 +302,12 @@ public class DiseaseInputParser {
                         for (int infectMult = 0; infectMult < runPlagueNTimes[2]; infectMult++){
                             for (int recoveryMult = 0; recoveryMult < runPlagueNTimes[3]; recoveryMult++){
                                 //WOW 4 freaking for loops what has this world become?
-                                    if (runningThreads < processorThreads){
+                                int[] location = new int[3];
+                                location[0] = densityMult;
+                                location[1] = infectMult;
+                                location[2] = recoveryMult;
+
+
                                         runningThreads++;
                                         threadManager.add(new NeuralSIRThread(inputData.get(1),
                                                 (int) (khaZixStorage[0][0] + (khaZixStorage[0][2] * populationMult)),
@@ -299,9 +315,9 @@ public class DiseaseInputParser {
                                                 (khaZixStorage[2][0] + (khaZixStorage[2][2] * infectMult)),
                                                 (khaZixStorage[3][0] + (khaZixStorage[3][2] * recoveryMult)),
                                                 inputData.get(8).intValue(), inputData.get(9).intValue(), inputData.get(10).intValue(),
-                                                inputData.get(11).intValue(), inputData.get(12), inputData.get(13)));
+                                                inputData.get(11).intValue(), inputData.get(12), inputData.get(13), location));
                                         threadManager.get(threadManager.size() - 1).start();
-                                    } if (runningThreads >= processorThreads) {
+                                    if (runningThreads >= processorThreads) {
                                         while (runningThreads >= processorThreads) {
                                             try {
                                                 Thread.sleep(50); // Why not, good time to check
@@ -313,6 +329,17 @@ public class DiseaseInputParser {
                                                         runningThreads--;
                                                         bufferSize--;
                                                         System.out.println(bufferSize + " operations left to complete, I think");
+
+                                                        maxInfectedBuffer[threadManager.get(i).SIRRunner.pointLocation[0]]
+                                                                [threadManager.get(i).SIRRunner.pointLocation[1]]
+                                                                [threadManager.get(i).SIRRunner.pointLocation[2]]
+                                                                = threadManager.get(i).SIRRunner.maxInfected;
+
+                                                        totalInfectedBuffer[threadManager.get(i).SIRRunner.pointLocation[0]]
+                                                                [threadManager.get(i).SIRRunner.pointLocation[1]]
+                                                                [threadManager.get(i).SIRRunner.pointLocation[2]]
+                                                                = threadManager.get(i).SIRRunner.totalInfected;
+
                                                         threadManager.remove(i);
                                                     }
                                                 }
@@ -330,52 +357,97 @@ public class DiseaseInputParser {
                         }
                     }
 
+
+                for (int density = 0; density < runPlagueNTimes[1]; density++){
+                    int[][] maxInfectedAt = maxInfectedBuffer[density];
+                    int[][] totalInfectedAt = totalInfectedBuffer[density];
+                    Double densityAtPoint = khaZixStorage[1][0] + (khaZixStorage[1][2] * density);
+                    writeResultsToCSV(densityAtPoint, maxInfectedAt, totalInfectedAt, khaZixStorage[2][0], khaZixStorage[2][2],
+                            khaZixStorage[3][0], khaZixStorage[3][2]);
+
+
+
+
+                }
+
+
+
+
                 break;
         }
     }
 
 
+    private void writeResultsToCSV(double density, int[][] maxInfected, int[][] totalInfected, double xStarting,
+                                   double xIncrement, double yStarting, double yIncrement){
 
-    private ArrayList<Double> parseInputFile(){
-        ArrayList<Double> userInputFloatingPoints = new ArrayList<Double>();
-
-
-        // FileReader reads text files in the default encoding.
-        FileReader fileReader = null;
-        LineNumberReader lnr  = null;
+        PrintWriter fileWriter;
 
         try {
-            fileReader = new FileReader(inputFileLocation);
-            lnr = new LineNumberReader(fileReader);
-            lnr.skip(Long.MAX_VALUE);
+            fileWriter = new PrintWriter("infectionCSV/MaxI Density:" + new DecimalFormat("#.#").format(density) + ".csv", "UTF-8");
+            fileWriter.println("Max Infected");
+            fileWriter.print("Space Left Blank, ");
+            for (int x = 0; x < maxInfected.length; x++){
+                fileWriter.print(", " + (xStarting + (xIncrement * x)));
+            }
+            for (int y = 0; y < maxInfected[0].length; y++){
+                fileWriter.print("\n" + (yStarting + (yIncrement * y)));
+                for (int x = 0; x < maxInfected.length; x++){
+                    fileWriter.print(", ");
+                    fileWriter.print(maxInfected[x][y]);
+                }
+            }
+            fileWriter.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("No idea why I can't make file Something is seriously wrong with your system");
+        } catch (UnsupportedEncodingException e) {
+            System.out.println("You do not have UTF-8? I am seriously amazed");
+        }
 
+        try {
+            fileWriter = new PrintWriter("infectionCSV/TotalI Density:" + new DecimalFormat("#.#").format(density) + ".csv", "UTF-8");
+            fileWriter.println("Max Infected");
+            fileWriter.print("Space Left Blank, ");
+            for (int x = 0; x < totalInfected.length; x++){
+                fileWriter.print(", " + (xStarting + (xIncrement * x)));
+            }
+            for (int y = 0; y < totalInfected[0].length; y++){
+                fileWriter.print("\n" + (yStarting + (yIncrement * y)));
+                for (int x = 0; x < totalInfected.length; x++){
+                    fileWriter.print(", ");
+                    fileWriter.print(totalInfected[x][y]);
+                }
+            }
+            fileWriter.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("No idea why I can't make file Something is seriously wrong with your system");
+        } catch (UnsupportedEncodingException e) {
+            System.out.println("You do not have UTF-8? I am seriously amazed");
+        }
+
+
+
+    }
+
+
+
+    private ArrayList<Double> parseInputFile(){
+        ArrayList<Double> userInputs = new ArrayList<>();
+
+
+        Scanner fileScanner = null;
+        try {
+            fileScanner = new Scanner(new File(inputFileLocation));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            System.out.println("Unable to find that file, please specify one that actually exists");
-            System.exit(404);
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Unable to do something, I don't even know.");
-            System.exit(403);
-        }
-        BufferedReader bufferedReader = new BufferedReader(fileReader);
-
-
-
-
-
-        for (int i = 0; i < lnr.getLineNumber(); i++){
-            try {
-                userInputFloatingPoints.add(Double.parseDouble(bufferedReader.readLine()));
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.out.println("You formatted your file improperly, the file is just 12 numbers separated by a return char.");
-                System.exit(405);
-            }
+            System.out.println("File not found, please specify an actual file.");
         }
 
+        while (fileScanner.hasNextDouble()){
+            userInputs.add(fileScanner.nextDouble());
+        }
 
-        return userInputFloatingPoints;
+        return userInputs;
     }
 
 

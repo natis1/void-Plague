@@ -16,13 +16,18 @@ public class NeuralSIRThread extends Thread {
     private double infectionRate;
     private double recoveryRate;
 
+    private int[] location;
+
 
     public boolean didFinish = false;
+
+
+    public NeuralDiseaseSIR SIRRunner;
     
     
     public NeuralSIRThread(double timeStepLength, int population, int residentialDensity, double infectionRate,
                            double recoveryRate, int cityXSize, int cityYSize, int unusedCityArea, int interactionRadius,
-                           double chanceOfHealthyLeavingHome, double chanceOfSickLeavingHome) {
+                           double chanceOfHealthyLeavingHome, double chanceOfSickLeavingHome, int[] location) {
         this.timeStepLength = timeStepLength;
         this.population = population;
         this.residentialDensity = residentialDensity;
@@ -34,6 +39,7 @@ public class NeuralSIRThread extends Thread {
         this.chanceOfSickLeavingHome = chanceOfSickLeavingHome;
         this.infectionRate = infectionRate;
         this.recoveryRate = recoveryRate;
+        this.location     = location;
         //Wow
 
 
@@ -49,8 +55,8 @@ public class NeuralSIRThread extends Thread {
         long startTime = System.nanoTime();
 
         try {
-            new NeuralDiseaseSIR(timeStepLength, population, residentialDensity, cityXSize, cityYSize, unusedCityArea, interactionRadius,
-                    chanceOfHealthyLeavingHome, chanceOfSickLeavingHome, infectionRate, recoveryRate, true);
+            SIRRunner = new NeuralDiseaseSIR(timeStepLength, population, residentialDensity, cityXSize, cityYSize, unusedCityArea, interactionRadius,
+                    chanceOfHealthyLeavingHome, chanceOfSickLeavingHome, infectionRate, recoveryRate, true, location);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             System.out.println("Error 404, file not found, attempting to continue anyway");
@@ -59,6 +65,7 @@ public class NeuralSIRThread extends Thread {
             System.out.println("Unknown encoding for saving the file, Please install UTF-8 on your system.");
         }
         System.out.println("Time taken: " + ((System.nanoTime() - startTime)/1000000) + " ms");
+        System.out.println("Max Infected: " + SIRRunner.maxInfected + ", Total Infected: " + SIRRunner.totalInfected);
         didFinish = true;
 
     }

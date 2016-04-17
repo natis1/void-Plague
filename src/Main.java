@@ -11,10 +11,15 @@ public class Main {
                 } else {
                     System.exit(22); //22 is invalid arg
                 }
-            } else if (args[0].contains("-i")) {
+            } else if (args[0].contains("-i") || args[0].contains("-I")) {
                 //TODO parse input file
                 String s = args[1];
-                new DiseaseInputParser(s);
+                if (args[2].contains("-t") || args[2].contains("-T")){
+                    new DiseaseInputParser(s, Integer.parseInt(args[3]));
+                } else {
+                    new DiseaseInputParser(s);
+                }
+
 
             } else {
                 System.exit(22); //22 is invalid arg
