@@ -275,13 +275,16 @@ public class DiseaseInputParser {
                 int bufferSize = 1;
 
                 for (int i = 0; i < 4; i++){
-                    if (khaZixStorage[i][0] == khaZixStorage[i][1]){
-                        runPlagueNTimes[i] = 0;
+                    if (khaZixStorage[i][0].intValue() == khaZixStorage[i][1].intValue()){
+                        runPlagueNTimes[i] = 1;
                     } else {
                         runPlagueNTimes[i] = (int) ((khaZixStorage[i][1] - khaZixStorage[i][0])/khaZixStorage[i][2]);
                         bufferSize *= runPlagueNTimes[i];
                     }
                 }
+
+
+                System.out.println("Created buffer for program.");
                 ArrayList<NeuralSIRThread> threadManager = new ArrayList<NeuralSIRThread>();
                 for (int populationMult = 0; populationMult < runPlagueNTimes[0]; populationMult++){
                     for (int densityMult = 0; densityMult < runPlagueNTimes[1]; densityMult++){
@@ -298,7 +301,7 @@ public class DiseaseInputParser {
                                                 inputData.get(8).intValue(), inputData.get(9).intValue(), inputData.get(10).intValue(),
                                                 inputData.get(11).intValue(), inputData.get(12), inputData.get(13)));
                                         threadManager.get(threadManager.size() - 1).start();
-                                    } else {
+                                    } if (runningThreads >= processorThreads) {
                                         while (runningThreads >= processorThreads) {
                                             try {
                                                 Thread.sleep(50); // Why not, good time to check
@@ -389,16 +392,26 @@ public class DiseaseInputParser {
 
 
         if (IDE_MODE){
+            allUserInputs.add("2");
+            allUserInputs.add("0.001");
+            allUserInputs.add("7900000");
+            allUserInputs.add("7900000");
+            allUserInputs.add("50");
+            allUserInputs.add("10000");
+            allUserInputs.add("20000");
+            allUserInputs.add("1000");
+            allUserInputs.add("32");
+            allUserInputs.add("32");
             allUserInputs.add("0");
-            allUserInputs.add("0.1");
-            allUserInputs.add("0");
+            allUserInputs.add("4");
+            allUserInputs.add("0.9");
+            allUserInputs.add("0.75");
+            allUserInputs.add("0.5");
             allUserInputs.add("5");
             allUserInputs.add("0.1");
-            allUserInputs.add("0");
+            allUserInputs.add("0.5");
             allUserInputs.add("5");
             allUserInputs.add("0.1");
-            allUserInputs.add("7800000");
-            allUserInputs.add("10");
         } else {
             Console c = System.console();
             String methodToUse = c.readLine();

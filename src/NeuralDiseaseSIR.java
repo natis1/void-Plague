@@ -2,6 +2,7 @@ import java.awt.*;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Vector;
@@ -82,7 +83,9 @@ public class NeuralDiseaseSIR {
 
         Random locationGenerator = new Random(System.nanoTime());
 
-        System.out.println("Init 1 completed");
+        if (!isQuiet){
+            System.out.println("Init 1 completed");
+        }
 
         while (unusedCityArea >= 0){
             int x = Math.abs(locationGenerator.nextInt() % cityXSize);
@@ -102,7 +105,9 @@ public class NeuralDiseaseSIR {
             populationTilesToGenerate = cityArea - 1;
         }
 
-        System.out.println("Init 2 completed");
+        if (!isQuiet){
+            System.out.println("Init 2 completed");
+        }
 
 		houseIndex = new ArrayList<>();
 		shopLocations = new Vector<>(populationTilesToGenerate);
@@ -117,8 +122,9 @@ public class NeuralDiseaseSIR {
             }
         }
 
-        System.out.println("Init 3 completed");
-
+        if (!isQuiet){
+            System.out.println("Init 3 completed");
+        }
 		for (int x = 0; x < cityXSize; x++){
 			for (int y = 0; y < cityYSize; y++){
 				if (cityRCI[x][y] == 0){
@@ -127,19 +133,17 @@ public class NeuralDiseaseSIR {
 			}
 		}
 
-        System.out.println("Init 4 completed");
-
+        if (!isQuiet){
+            System.out.println("Init 4 completed");
+        }
 		for (int x = 0; x < shopLocations.capacity(); x++){
 			shopLocations.add(determineViableShops( (int) houseIndex.get(x).getX(), (int) houseIndex.get(x).getY()));
 		}
 
-
-        System.out.println("Was able to produce a city with a population of" +
-                "\n" + populationTiles * residentialDensity + "" +
-                "\nusing these numbers");
+        System.out.println("City Size: " + populationTiles * residentialDensity);
 
         fileWriter = new PrintWriter("infectionCSV/NeuralP" + population + "D" + residentialDensity +
-                "I" + infectionRate + "R" + recoveryRate + ".csv", "UTF-8");
+                "I" + new DecimalFormat("#.##").format(infectionRate) + "R" + new DecimalFormat("#.##").format(recoveryRate) + ".csv", "UTF-8");
 
         fileWriter.write("Population, density, infection rate, recovery rate," +
                 "chance for sick to leave, chance for healthy to leave, interaction radius\n");
