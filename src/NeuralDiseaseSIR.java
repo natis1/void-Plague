@@ -150,8 +150,12 @@ public class NeuralDiseaseSIR {
 			shopLocations.add(determineViableShops( (int) houseIndex.get(x).getX(), (int) houseIndex.get(x).getY()));
 		}
 
-        System.out.println("City Size: " + populationTiles * residentialDensity);
 
+
+        this.population = populationTiles * residentialDensity;
+        population = this.population;
+
+        System.out.println("Actual city size: " + population);
 
 
         if (!isQuiet){
@@ -165,17 +169,17 @@ public class NeuralDiseaseSIR {
         }
 
 
-        people = new int[(int)(populationTiles * residentialDensity)][4]; //0 is current location, 1 is home location,
+        people = new int[population][4]; //0 is current location, 1 is home location,
         // 2 is tendency to leave house, 3 is SIR status
 
-        timeStepsAtLocation = new double[(int)(populationTiles * residentialDensity)];
+        timeStepsAtLocation = new double[population];
         for (int t = 0; t < population; t++){
             people[t][2] = (int) (1000000000 * (0.75 * neuralRNG.nextDouble() + 0.25));
         }
         for (int i = 0; i < populationTiles; i++){
-            for (int l = 0; l < population; l++){
-                people[l][1] = -i;
-                people[l][0] = -i; //homes portrayed as negative location when described by where people live
+            for (int l = 0; l < residentialDensity; l++){
+                people[l + i * (residentialDensity) ][1] = -i;
+                people[l + i * (residentialDensity) ][0] = -i; //homes portrayed as negative location when described by where people live
             }
         }
         int randomPersonToInfect = (int) ((population - 11) * neuralRNG.nextDouble());
