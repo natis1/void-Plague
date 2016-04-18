@@ -155,6 +155,7 @@ public class NeuralDiseaseSIR {
                     fileWriter.write(Integer.toString(val));
                     fileWriter.write(" ");
                 }
+                fileWriter.println();
             }
             fileWriter.close();
 
