@@ -152,6 +152,9 @@ public class NeuralDiseaseSIR {
             for (int x = 0; x < cityXSize; x++){
                 for (int y = 0; y < cityYSize; y++){
                     int val = cityRCI[x][y];
+                    if (val >= 0){
+                        fileWriter.write(" ");//This evens it out
+                    }
                     fileWriter.write(Integer.toString(val));
                     fileWriter.write(" ");
                 }
