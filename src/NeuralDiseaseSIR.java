@@ -17,6 +17,8 @@ public class NeuralDiseaseSIR {
     private int recoveredPopulation;
     private int infectedPopulation = 10;
 
+    private double recoveredPercentage = 0.0;
+
     private int lastPrintedTimestep = 0;
 
     private double infectionRate;
@@ -270,7 +272,7 @@ public class NeuralDiseaseSIR {
                 }
 
                 //First infect anyone who isn't in bed right now.
-                if (people[i][3] == 1 && people[i][0] >= 0 && (infectionRate * timeStepLength) > neuralRNG.nextDouble()){
+                if (people[i][3] == 1 && people[i][0] >= 0 && (infectionRate * timeStepLength) * (1 - (0.5 * recoveredPercentage)) > neuralRNG.nextDouble()){
                     locationalInfections[people[i][0]]++;
                 }
                 if (people[i][0] >= 0){
@@ -301,6 +303,7 @@ public class NeuralDiseaseSIR {
             maxInfected = infectedPopulation;
         }
         recoveredPopulation = population - infectedPopulation - susceptiblePopulation;
+        recoveredPercentage = recoveredPopulation / population;
         timeStep += timeStepLength;
 
         if (!isQuiet){

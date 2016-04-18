@@ -284,7 +284,7 @@ public class DiseaseInputParser {
                 int bufferSize = 1;
 
                 for (int i = 0; i < 4; i++){
-                    if (khaZixStorage[i][0].intValue() == khaZixStorage[i][1].intValue()){
+                    if ((khaZixStorage[i][0].compareTo(khaZixStorage[i][1])) == 0){
                         runPlagueNTimes[i] = 1;
                     } else {
                         runPlagueNTimes[i] = (int) ((khaZixStorage[i][1] - khaZixStorage[i][0])/khaZixStorage[i][2]);
@@ -364,10 +364,6 @@ public class DiseaseInputParser {
                     Double densityAtPoint = khaZixStorage[1][0] + (khaZixStorage[1][2] * density);
                     writeResultsToCSV(densityAtPoint, maxInfectedAt, totalInfectedAt, khaZixStorage[2][0], khaZixStorage[2][2],
                             khaZixStorage[3][0], khaZixStorage[3][2]);
-
-
-
-
                 }
 
 
@@ -386,7 +382,7 @@ public class DiseaseInputParser {
         try {
             fileWriter = new PrintWriter("infectionCSV/MaxI Density:" + new DecimalFormat("#.#").format(density) + ".csv", "UTF-8");
             fileWriter.println("Max Infected");
-            fileWriter.print("Space Left Blank, ");
+            fileWriter.print("Space Left Blank");
             for (int x = 0; x < maxInfected.length; x++){
                 fileWriter.print(", " + (xStarting + (xIncrement * x)));
             }
