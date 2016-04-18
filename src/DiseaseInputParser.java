@@ -455,7 +455,7 @@ public class DiseaseInputParser {
 
         System.out.println("Hello and welcome to Void Plague disease calculator");
 
-        System.out.println("Please enter the method you want to calculate diseases (neural, basic, multi neural)");
+        System.out.println("Please enter the method you want to calculate diseases (neural or multi neural)");
 
 
 
