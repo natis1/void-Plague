@@ -147,6 +147,20 @@ public class NeuralDiseaseSIR {
 
         if (!isQuiet){
             System.out.println("Init 4 completed");
+
+            fileWriter = new PrintWriter(("infectionCSV/CityExport.txt"));
+            for (int x = 0; x < cityXSize; x++){
+                for (int y = 0; y < cityYSize; y++){
+                    fileWriter.write(cityRCI[x][y]);
+                    if (y != cityYSize - 1){
+                        fileWriter.write(" ");
+                    } else {
+                        fileWriter.write("\n");
+                    }
+                }
+            }
+            fileWriter.close();
+
         }
 		for (int x = 0; x < shopLocations.capacity(); x++){
 			shopLocations.add(determineViableShops( (int) houseIndex.get(x).getX(), (int) houseIndex.get(x).getY()));
