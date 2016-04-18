@@ -151,7 +151,8 @@ public class NeuralDiseaseSIR {
             fileWriter = new PrintWriter(("infectionCSV/CityExport.txt"));
             for (int x = 0; x < cityXSize; x++){
                 for (int y = 0; y < cityYSize; y++){
-                    fileWriter.write(cityRCI[x][y]);
+                    int val = cityRCI[x][y];
+                    fileWriter.write(val);
                     if (y != cityYSize - 1){
                         fileWriter.write(" ");
                     } else {
