@@ -514,11 +514,26 @@ public class DiseaseInputParser {
                     allUserInputs.add(c.readLine());
 
                 } else {
-                    System.out.println("In order, enter 1, timestep size, population, population density, city X, city Y, unused city tiles," +
-                            "interaction radius, chance for healthy to leave house, chance for sick to leave house infection rate, and recovery rate");
-                    for (int i = 0; i < 12; i++) {
-                        allUserInputs.add(c.readLine());
-                    }
+
+                    System.out.println("Enter 1, timestep size, and population");
+                    allUserInputs.add(c.readLine());
+                    allUserInputs.add(c.readLine());
+                    allUserInputs.add(c.readLine());
+                    System.out.println("Enter population density");
+                    allUserInputs.add(c.readLine());
+                    System.out.println("Enter the city dimensions and the unused city tiles");
+                    allUserInputs.add(c.readLine());
+                    allUserInputs.add(c.readLine());
+                    allUserInputs.add(c.readLine());
+                    System.out.println("Enter the human interaction radius (IE how far people will travel through the city)");
+                    allUserInputs.add(c.readLine());
+                    System.out.println("Enter the chance for health people to leave home");
+                    allUserInputs.add(c.readLine());
+                    System.out.println("Enter the chance for sick to do the same.");
+                    allUserInputs.add(c.readLine());
+                    System.out.println("Enter the infection and recovery rates");
+                    allUserInputs.add(c.readLine());
+                    allUserInputs.add(c.readLine());
                 }
             } else if (methodToUse.contains("basic") || methodToUse.contains("Basic")){
                 System.out.println("\nIn order, enter 0, timestep size, starting and ending infection rate, infection size step, starting and ending recovery rate, and recovery timestep. Finally, total people and infected people");
