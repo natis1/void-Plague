@@ -271,16 +271,16 @@ public class NeuralDiseaseSIR {
                 if (people[i][1] == people[i][0] && timeStepsAtLocation[i] <= 0){
                     //Resets the time spend outside. Extraverts spend lots more time out compared to intraverts
                     if (people[i][3] == 0 && chanceOfHealthyLeavingHome > neuralRNG.nextDouble()){
-                        timeStepsAtLocation[i] = (double) people[i][2] / 750000000.0;
+                        timeStepsAtLocation[i] = (double) people[i][2] / 2500000000.0;
                         movePersonOutsideHome(i);
                     } else if (people[i][3] > 0 && chanceOfSickLeavingHome > neuralRNG.nextDouble()){
-                        timeStepsAtLocation[i] = (double) people[i][2] / 750000000.0;
+                        timeStepsAtLocation[i] = (double) people[i][2] / 2500000000.0;
                         movePersonOutsideHome(i);
                     } else {
-                        timeStepsAtLocation[i] = 1.5 - ((double) people[i][2] / 750000000.0);
+                        timeStepsAtLocation[i] = 1.5 - ((double) people[i][2] / 2500000000.0);
                     }
                 } else if (people[i][1] != people[i][0] && timeStepsAtLocation[i] <= 0){
-                    timeStepsAtLocation[i] = 1.5 - ((double) people[i][2] / 750000000.0);
+                    timeStepsAtLocation[i] = 1.5 - ((double) people[i][2] / 2500000000.0);
                     people[i][1] = people[i][0]; //Go home, you're drunk
                 } else {
                     timeStepsAtLocation[i] -= timeStepLength;
